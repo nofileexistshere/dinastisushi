@@ -8,13 +8,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#fff1f2',
-          100: '#ffe4e6',
-          500: '#f43f5e',
-          600: '#e11d48',
-          700: '#be123c',
-        },
+        "primary-background": "#fff7ed", //ini orange muda
+        "primary-navbar": "#ffedd5", //ini orange apa ya
+        "primary-dashboard": "#FF8C00", //ini orange terang
+        "primary-button": "#F57C00", //ini orange agak gelap
+        "primary-card": "#E65100", //ini orange gelap banget
       },
     },
   },
