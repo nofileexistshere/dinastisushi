@@ -11,7 +11,7 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('admin.index');
         }
         
         // Get demo users for display
@@ -29,7 +29,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('dashboard');
+            return redirect()->route('admin.index');
         }
 
         return back()->withErrors([
@@ -41,7 +41,7 @@ class AuthController extends Controller
     {
         $user = User::findOrFail($userId);
         Auth::login($user);
-        return redirect()->route('dashboard');
+        return redirect()->route('admin.index');
     }
 
     public function register(Request $request)
@@ -67,7 +67,7 @@ class AuthController extends Controller
 
         Auth::login($user);
         
-        return redirect()->route('dashboard')->with('success', 'Akun berhasil dibuat! Selamat datang di Dinasti Sushi.');
+        return redirect()->route('admin.index')->with('success', 'Akun berhasil dibuat! Selamat datang di Dinasti Sushi.');
     }
 
     public function logout(Request $request)
