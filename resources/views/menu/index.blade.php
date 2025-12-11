@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4 text-sm sm:text-base">
                 <div class="flex items-center">
-                    <a href="{{ route('admin.index') }}" class="mr-4">
+                    <a href="{{ route('menu.index') }}" class="mr-4">
                         <svg class="w-6 h-6 text-gray-600 hover:text-pink-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
                         </svg>
@@ -17,11 +17,16 @@
                     <h1 class="text-2xl font-bold text-gray-900">Menu Sushi</h1>
                 </div>
                 
-                <a href="{{ route('history.index') }}" class="flex items-center text-gray-700 hover:text-pink-600 transition-colors">
+                <a href="{{ route('cart.index') }}" class="relative flex items-center text-gray-700 hover:text-pink-600 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
                     </svg>
-                    Histori
+                    <span>Keranjang</span>
+                    @if(!empty($cartCount))
+                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-none text-white bg-pink-500 rounded-full">
+                            {{ $cartCount }}
+                        </span>
+                    @endif
                 </a>
             </div>
         </div>
@@ -29,6 +34,12 @@
     
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if(session('success'))
+            <div class="mb-4 px-4 py-3 rounded-xl bg-green-50 text-green-700 text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <!-- Search and Filter -->
         <div class="bg-white rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <form method="GET" action="{{ route('menu.index') }}" class="space-y-4">
@@ -80,11 +91,13 @@
             @forelse($menuItems as $item)
                 <div class="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                     <div class="relative">
-                        <img 
-                            src="{{ $item->image }}" 
-                            alt="{{ $item->name }}"
-                            class="w-full h-56 object-cover"
-                        >
+                        <a href="{{ route('menu.show', $item->id) }}">
+                            <img 
+                                src="{{ $item->image }}" 
+                                alt="{{ $item->name }}"
+                                class="w-full h-56 object-cover"
+                            >
+                        </a>
                         @if(in_array($item->id, $orderedMenuIds))
                             <span class="absolute top-4 left-4 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -135,7 +148,7 @@
                         <div class="flex justify-between items-center">
                             <p class="text-2xl font-bold text-pink-600">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
                             
-                            <form method="POST" action="{{ route('order.store') }}">
+                            <form method="POST" action="{{ route('cart.add') }}">
                                 @csrf
                                 <input type="hidden" name="menu_item_id" value="{{ $item->id }}">
                                 <input type="hidden" name="quantity" value="1">

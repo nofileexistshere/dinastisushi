@@ -30,16 +30,20 @@ class MenuController extends Controller
         
         $menuItems = $query->orderBy('category')->orderBy('name')->get();
         
-        // Get user's ordered menu item IDs
+        // Get user's ordered menu item IDs (for logged in user)
         $orderedMenuIds = Order::where('user_id', Auth::id())
             ->pluck('menu_item_id')
             ->unique()
             ->toArray();
+
+        // Guest cart count from session
+        $cart = $request->session()->get('cart', []);
+        $cartCount = array_sum(array_column($cart, 'quantity'));
         
-        return view('menu.index', compact('menuItems', 'category', 'search', 'orderedMenuIds'));
+        return view('menu.index', compact('menuItems', 'category', 'search', 'orderedMenuIds', 'cartCount'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $menuItem = MenuItem::with('ratings')->findOrFail($id);
         
@@ -49,6 +53,10 @@ class MenuController extends Controller
             ->distinct('user_id')
             ->count();
         
-        return view('menu.show', compact('menuItem', 'similarUsersCount'));
+        // Guest cart count from session
+        $cart = $request->session()->get('cart', []);
+        $cartCount = array_sum(array_column($cart, 'quantity'));
+
+        return view('menu.show', compact('menuItem', 'similarUsersCount', 'cartCount'));
     }
 }
