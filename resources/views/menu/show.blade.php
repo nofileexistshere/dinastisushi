@@ -16,12 +16,30 @@
                     </a>
                     <h1 class="text-2xl font-bold text-gray-900">Detail Menu</h1>
                 </div>
+
+                <a href="{{ route('cart.index') }}" class="relative flex items-center text-gray-700 hover:text-pink-600 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                    </svg>
+                    <span>Keranjang</span>
+                    @if(!empty($cartCount))
+                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-none text-white bg-pink-500 rounded-full">
+                            {{ $cartCount }}
+                        </span>
+                    @endif
+                </a>
             </div>
         </div>
     </header>
     
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if(session('success'))
+            <div class="mb-4 px-4 py-3 rounded-xl bg-green-50 text-green-700 text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
             <div class="md:flex">
                 <!-- Image -->
@@ -76,7 +94,7 @@
                         <p class="text-4xl font-bold text-pink-600 mb-2">Rp {{ number_format($menuItem->price, 0, ',', '.') }}</p>
                     </div>
                     
-                    <form method="POST" action="{{ route('order.store') }}" class="mb-6">
+                    <form method="POST" action="{{ route('cart.add') }}" class="mb-6">
                         @csrf
                         <input type="hidden" name="menu_item_id" value="{{ $menuItem->id }}">
                         <div class="flex items-center space-x-4 mb-4">
@@ -88,7 +106,7 @@
                                 value="1" 
                                 min="1" 
                                 max="10"
-                                class="w-24 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                class="w-20 px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm"
                             >
                         </div>
                         <button 
