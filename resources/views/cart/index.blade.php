@@ -41,7 +41,9 @@
                         @php($item = $row['model'])
                         <div class="flex justify-between items-center border-gray-100 pb-4">
                             <div class="flex items-center space-x-4">
-                                <img src="{{ $item->image }}" alt="{{ $item->name }}" class="w-14 h-14 sm:w-16 sm:h-16 object-cover" style="border-radius: 5px;">
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
+                                    <img src="{{ $item->image }}" alt="{{ $item->name }}" class="w-full sm:w-40 h-48 sm:h-32 object-cover rounded-2xl flex-shrink-0">
+                                </div>
                                 <div>
                                     <p class="font-semibold text-gray-900">{{ $item->name }}</p>
                                     <form method="POST" action="{{ route('cart.update') }}" class="mt-1 flex items-center space-x-4">

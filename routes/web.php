@@ -15,10 +15,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/login/demo/{userId}', [AuthController::class, 'loginAsDemo'])->name('login.demo');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Public menu & cart routes (guest bisa akses)
-Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-Route::get('/menu/{id}', [MenuController::class, 'show'])->name('menu.show');
-
+// Public cart routes (guest bisa akses)
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
@@ -27,6 +24,10 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 
 // Protected routes
 Route::middleware('auth')->group(function () {
+    // Menu hanya bisa diakses setelah login
+    Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
+    Route::get('/menu/{id}', [MenuController::class, 'show'])->name('menu.show');
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');

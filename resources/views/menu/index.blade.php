@@ -5,11 +5,11 @@
 @section('content')
 <div class="min-h-screen">
     <!-- Header -->
-    <header class="bg-white border-b border-gray-200">
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4 text-sm sm:text-base">
                 <div class="flex items-center">
-                    <a href="{{ route('menu.index') }}" class="mr-4">
+                    <a href="{{ route('dashboard') }}" class="mr-4">
                         <svg class="w-6 h-6 text-gray-600 hover:text-pink-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
                         </svg>
@@ -17,17 +17,28 @@
                     <h1 class="text-2xl font-bold text-gray-900">Menu Sushi</h1>
                 </div>
                 
-                <a href="{{ route('cart.index') }}" class="relative flex items-center text-gray-700 hover:text-pink-600 transition-colors">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
-                    </svg>
-                    <span>Keranjang</span>
-                    @if(!empty($cartCount))
-                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-none text-white bg-pink-500 rounded-full">
-                            {{ $cartCount }}
-                        </span>
-                    @endif
-                </a>
+                <div class="flex items-center space-x-6">
+                    <a href="{{ route('cart.index') }}" class="relative flex items-center text-gray-700 hover:text-pink-600 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                        </svg>
+                        <span class="mr-3">Keranjang</span>
+                        @if(!empty($cartCount))
+                            <span class="mr-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-none text-white bg-pink-500 rounded-full">
+                                {{ $cartCount }}
+                            </span>
+                        @endif
+                    </a>
+
+                    <div class="flex items-center text-gray-700">
+                        <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center mr-3 ml-2">
+                            <svg class="w-5 h-5 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 100 8 4 4 0 000-8zM4 14a6 6 0 1112 0v1a1 1 0 01-1 1H5a1 1 0 01-1-1v-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="font-medium truncate max-w-[8rem]">{{ Auth::user()->name }}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
