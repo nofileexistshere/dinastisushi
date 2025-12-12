@@ -106,7 +106,7 @@
                                 value="1" 
                                 min="1" 
                                 max="10"
-                                class="w-24 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                class="w-20 px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm"
                             >
                         </div>
                         <button 
