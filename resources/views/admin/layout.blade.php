@@ -7,13 +7,16 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-gray-100" x-data="{ sidebarOpen: window.innerWidth >= 768, mobileMenuOpen: false }" @resize.window="sidebarOpen = window.innerWidth >= 768">
+<body class="bg-gray-100" x-data="{ sidebarOpen: true, mobileMenuOpen: false }">
     <div class="min-h-screen">
-        <!-- Mobile Overlay -->
-        <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+        <!-- Mobile Overlay (click to close) -->
+        <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 z-40 md:hidden"></div>
         
         <!-- Sidebar -->
-        <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-white text-gray-800 fixed left-0 top-0 h-full min-h-screen overflow-hidden shadow-lg border-r border-gray-200 transition-all duration-300 md:translate-x-0 z-50" :class="{'translate-x-0': mobileMenuOpen, '-translate-x-full': !mobileMenuOpen}" x-cloak>
+        <aside :class="[
+            sidebarOpen ? 'w-64' : 'w-20',
+            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        ]" class="bg-white text-gray-800 fixed left-0 top-0 h-full min-h-screen overflow-hidden shadow-lg border-r border-gray-200 transition-all duration-300 z-50" x-cloak>
             <div class="p-4 h-full overflow-y-auto">
                 <div class="mb-8">
                     <div x-show="sidebarOpen" class="flex items-center justify-between">
