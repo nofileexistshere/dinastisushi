@@ -8,8 +8,13 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
 
+// Landing page
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
+
 // Authentication routes
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::get('/login/demo/{userId}', [AuthController::class, 'loginAsDemo'])->name('login.demo');
