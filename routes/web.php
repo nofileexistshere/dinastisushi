@@ -36,3 +36,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/order/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
     Route::post('/order/{orderId}/rate', [OrderController::class, 'rate'])->name('order.rate');
 });
+
+// Admin routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    
+    Route::get('/orders', [\App\Http\Controllers\Admin\OrderManagementController::class, 'index'])->name('orders.index');
+    Route::delete('/orders/{id}', [\App\Http\Controllers\Admin\OrderManagementController::class, 'destroy'])->name('orders.destroy');
+    
+    Route::resource('menu', \App\Http\Controllers\Admin\MenuManagementController::class);
+});

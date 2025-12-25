@@ -16,23 +16,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create admin user
+        $admin = User::create([
+            'name' => 'Admin Dinasti Sushi',
+            'email' => 'admin@dinastisushi.com',
+            'password' => Hash::make('admin123'),
+            'is_admin' => true,
+        ]);
+
         // Create demo users
         $user1 = User::create([
             'name' => 'Budi Santoso',
             'email' => 'budi@example.com',
             'password' => Hash::make('password'),
+            'is_admin' => false,
         ]);
 
         $user2 = User::create([
             'name' => 'Siti Nurhaliza',
             'email' => 'siti@example.com',
             'password' => Hash::make('password'),
+            'is_admin' => false,
         ]);
 
         $user3 = User::create([
             'name' => 'Ahmad Rizki',
             'email' => 'ahmad@example.com',
             'password' => Hash::make('password'),
+            'is_admin' => false,
         ]);
 
         // Create menu items
