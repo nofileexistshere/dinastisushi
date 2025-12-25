@@ -15,7 +15,35 @@ class MenuController extends Controller
         $category = $request->get('category', 'Semua');
         $search = $request->get('search', '');
         
-        $query = MenuItem::query();
+        // Recommendations Logic
+        $recommendations = collect();
+        
+        if ($category === 'Semua') {
+            // Global Recommendations (Top 1 from each category)
+            $categories = ['Sushi Roll', 'Nigiri & Sashimi', 'Ramen & Udon', 'Snack & Dessert', 'Rice', 'Party', 'Beverages'];
+            
+            foreach ($categories as $cat) {
+                $bestItem = MenuItem::where('category', $cat)
+                    ->withCount('orders')
+                    ->orderByDesc('orders_count')
+                    ->orderByDesc('average_rating')
+                    ->first();
+                    
+                if ($bestItem) {
+                    $recommendations->push($bestItem);
+                }
+            }
+        } else {
+            // Specific Category Recommendations (Top 3 from this category)
+            $recommendations = MenuItem::where('category', $category)
+                ->withCount('orders')
+                ->orderByDesc('orders_count')
+                ->orderByDesc('average_rating')
+                ->take(3)
+                ->get();
+        }
+
+        $query = MenuItem::withCount('orders');
         
         if ($category !== 'Semua') {
             $query->where('category', $category);
@@ -28,6 +56,8 @@ class MenuController extends Controller
             });
         }
         
+        // Return collection instead of paginator if grouping is needed easily, 
+        // or just get() as before.
         $menuItems = $query->orderBy('category')->orderBy('name')->get();
         
         // Get user's ordered menu item IDs (for logged in user)
@@ -40,7 +70,7 @@ class MenuController extends Controller
         $cart = $request->session()->get('cart', []);
         $cartCount = array_sum(array_column($cart, 'quantity'));
         
-        return view('menu.index', compact('menuItems', 'category', 'search', 'orderedMenuIds', 'cartCount'));
+        return view('menu.index', compact('menuItems', 'category', 'search', 'orderedMenuIds', 'cartCount', 'recommendations'));
     }
 
     public function show(Request $request, $id)
