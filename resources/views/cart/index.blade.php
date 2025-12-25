@@ -85,15 +85,31 @@
                             </button>
                         </form>
 
-                        <button
-                            type="button"
-                            class="w-full sm:w-auto bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all text-base text-center"
-                        >
-                            Checkout
-                        </button>
+                        @auth
+                            <form method="POST" action="{{ route('order.checkout') }}" class="w-full sm:w-auto">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="w-full sm:w-auto bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all text-base text-center"
+                                >
+                                    Checkout Sekarang
+                                </button>
+                            </form>
+                        @else
+                            <a
+                                href="{{ route('login') }}"
+                                class="w-full sm:w-auto bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all text-base text-center inline-block"
+                            >
+                                Login untuk Checkout
+                            </a>
+                        @endauth
                     </div>
 
-                    <p class="mt-4 text-sm text-gray-500">* Untuk tahap ini, pemesanan hanya disimpan di keranjang (session) untuk guest.</p>
+                    @auth
+                        <p class="mt-4 text-sm text-gray-500">* Klik checkout untuk memproses pesanan Anda.</p>
+                    @else
+                        <p class="mt-4 text-sm text-gray-500">* Silakan login terlebih dahulu untuk melakukan checkout.</p>
+                    @endauth
                 @endif
             </div>
         </main>

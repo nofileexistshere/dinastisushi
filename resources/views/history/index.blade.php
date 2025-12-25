@@ -30,6 +30,12 @@
     
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if(session('success'))
+            <div class="mb-6 px-4 py-3 rounded-xl bg-green-50 text-green-700 text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+        
         <!-- Statistics -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <div class="bg-white rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6">
@@ -126,32 +132,51 @@
                             
                             <p class="text-sm sm:text-base text-gray-600 mb-4">{{ $order->menuItem->description }}</p>
                             
-                            <div class="flex justify-between items-center">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
                                 @php
                                     $userRating = $order->menuItem->ratings->where('user_id', Auth::id())->first();
                                 @endphp
                                 
-                                @if($userRating)
-                                    <div class="flex items-center">
-                                        <span class="text-sm text-gray-600 mr-2">Rating Anda:</span>
-                                        <div class="flex text-yellow-500">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                @if($i <= $userRating->rating)
-                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                    </svg>
-                                                @else
-                                                    <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                    </svg>
-                                                @endif
-                                            @endfor
+                                <div class="flex-grow">
+                                    @if($userRating)
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-600 mr-2">Rating Anda:</span>
+                                            <div class="flex text-yellow-500">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    @if($i <= $userRating->rating)
+                                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                        </svg>
+                                                    @else
+                                                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                        </svg>
+                                                    @endif
+                                                @endfor
+                                            </div>
+                                            <span class="ml-2 text-sm text-gray-600">{{ $userRating->rating }}/5</span>
                                         </div>
-                                        <span class="ml-2 text-sm text-gray-600">{{ $userRating->rating }}/5</span>
-                                    </div>
-                                @else
-                                    <div class="text-sm text-gray-500">Belum ada rating</div>
-                                @endif
+                                    @else
+                                        <form method="POST" action="{{ route('order.rate', $order->id) }}" class="flex items-center gap-2">
+                                            @csrf
+                                            <span class="text-sm text-gray-600 mr-2">Beri rating:</span>
+                                            <div class="flex gap-1">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <button 
+                                                        type="submit" 
+                                                        name="rating" 
+                                                        value="{{ $i }}"
+                                                        class="rating-star hover:scale-110 transition-transform"
+                                                    >
+                                                        <svg class="w-6 h-6 text-gray-300 hover:text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                        </svg>
+                                                    </button>
+                                                @endfor
+                                            </div>
+                                        </form>
+                                    @endif
+                                </div>
                                 
                                 <form method="POST" action="{{ route('order.store') }}">
                                     @csrf

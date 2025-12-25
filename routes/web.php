@@ -33,5 +33,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
     
     Route::post('/order', [OrderController::class, 'store'])->name('order.store');
+    Route::post('/order/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
     Route::post('/order/{orderId}/rate', [OrderController::class, 'rate'])->name('order.rate');
 });

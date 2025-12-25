@@ -10,6 +10,36 @@ use App\Models\Rating;
 
 class OrderController extends Controller
 {
+    public function checkout(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk checkout.');
+        }
+
+        $cart = $request->session()->get('cart', []);
+
+        if (empty($cart)) {
+            return redirect()->route('cart.index')->with('error', 'Keranjang Anda kosong.');
+        }
+
+        $menuItems = MenuItem::whereIn('id', array_keys($cart))->get();
+        
+        foreach ($menuItems as $menuItem) {
+            if (isset($cart[$menuItem->id])) {
+                $quantity = $cart[$menuItem->id]['quantity'];
+                Order::create([
+                    'user_id' => Auth::id(),
+                    'menu_item_id' => $menuItem->id,
+                    'quantity' => $quantity,
+                    'total_price' => $menuItem->price * $quantity,
+                ]);
+            }
+        }
+
+        $request->session()->forget('cart');
+
+        return redirect()->route('history.index')->with('success', 'Pesanan berhasil! Jangan lupa kasih rating ya!');
+    }
 
     public function store(Request $request)
     {
