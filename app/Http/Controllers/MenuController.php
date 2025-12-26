@@ -2,91 +2,203 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\MenuService;
+use App\Services\CartService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use App\Models\MenuItem;
-use App\Models\Order;
+use Illuminate\Validation\ValidationException;
 
+/**
+ * Menu Controller
+ * 
+ * Handles menu display, search, filtering, and recommendations
+ */
 class MenuController extends Controller
 {
+    private MenuService $menuService;
+    private CartService $cartService;
 
-    public function index(Request $request)
+    /**
+     * Constructor
+     *
+     * @param MenuService $menuService
+     * @param CartService $cartService
+     */
+    public function __construct(MenuService $menuService, CartService $cartService)
     {
-        $category = $request->get('category', 'Semua');
-        $search = $request->get('search', '');
-        
-        // Recommendations Logic
-        $recommendations = collect();
-        
-        if ($category === 'Semua') {
-            // Global Recommendations (Top 1 from each category)
-            $categories = ['Sushi Roll', 'Nigiri & Sashimi', 'Ramen & Udon', 'Snack & Dessert', 'Rice', 'Party', 'Beverages'];
-            
-            foreach ($categories as $cat) {
-                $bestItem = MenuItem::where('category', $cat)
-                    ->withCount('orders')
-                    ->orderByDesc('orders_count')
-                    ->orderByDesc('average_rating')
-                    ->first();
-                    
-                if ($bestItem) {
-                    $recommendations->push($bestItem);
-                }
-            }
-        } else {
-            // Specific Category Recommendations (Top 3 from this category)
-            $recommendations = MenuItem::where('category', $category)
-                ->withCount('orders')
-                ->orderByDesc('orders_count')
-                ->orderByDesc('average_rating')
-                ->take(3)
-                ->get();
-        }
-
-        $query = MenuItem::withCount('orders');
-        
-        if ($category !== 'Semua') {
-            $query->where('category', $category);
-        }
-        
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-        
-        // Return collection instead of paginator if grouping is needed easily, 
-        // or just get() as before.
-        $menuItems = $query->orderBy('category')->orderBy('name')->get();
-        
-        // Get user's ordered menu item IDs (for logged in user)
-        $orderedMenuIds = Order::where('user_id', Auth::id())
-            ->pluck('menu_item_id')
-            ->unique()
-            ->toArray();
-
-        // Guest cart count from session
-        $cart = $request->session()->get('cart', []);
-        $cartCount = array_sum(array_column($cart, 'quantity'));
-        
-        return view('menu.index', compact('menuItems', 'category', 'search', 'orderedMenuIds', 'cartCount', 'recommendations'));
+        $this->menuService = $menuService;
+        $this->cartService = $cartService;
     }
 
-    public function show(Request $request, $id)
+    /**
+     * Display menu items with filtering and search
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function index(Request $request): \Illuminate\View\View
     {
-        $menuItem = MenuItem::with('ratings')->findOrFail($id);
-        
-        // Get similar users count (users who also rated this item)
-        $similarUsersCount = Order::where('menu_item_id', $id)
-            ->where('user_id', '!=', Auth::id())
-            ->distinct('user_id')
-            ->count();
-        
-        // Guest cart count from session
-        $cart = $request->session()->get('cart', []);
-        $cartCount = array_sum(array_column($cart, 'quantity'));
+        try {
+            $validated = $request->validate([
+                'category' => 'nullable|string|in:Semua,Sushi Roll,Nigiri & Sashimi,Ramen & Udon,Snack & Dessert,Rice,Party,Beverages',
+                'search' => 'nullable|string|max:255',
+            ]);
 
-        return view('menu.show', compact('menuItem', 'similarUsersCount', 'cartCount'));
+            $category = $validated['category'] ?? 'Semua';
+            $search = $validated['search'] ?? '';
+
+            $menuItems = $this->menuService->getMenuItems($category, $search);
+            $recommendations = $this->menuService->getRecommendations($category);
+            $orderedMenuIds = $this->menuService->getUserOrderedMenuIds();
+            
+            $cart = $request->session()->get('cart', []);
+            $cartCount = $this->cartService->getCartCount($cart);
+
+            return view('menu.index', compact(
+                'menuItems', 
+                'category', 
+                'search', 
+                'orderedMenuIds', 
+                'cartCount', 
+                'recommendations'
+            ));
+
+        } catch (ValidationException $e) {
+            return back()
+                ->withErrors($e->validator())
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Menu index error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memuat menu.');
+        }
+    }
+
+    /**
+     * Display single menu item details
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\View\View
+     */
+    public function show(Request $request, int $id): \Illuminate\View\View
+    {
+        try {
+            $menuItem = $this->menuService->getMenuItem($id);
+            $similarUsersCount = $this->menuService->getSimilarUsersCount($id);
+            
+            $cart = $request->session()->get('cart', []);
+            $cartCount = $this->cartService->getCartCount($cart);
+
+            return view('menu.show', compact('menuItem', 'similarUsersCount', 'cartCount'));
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('menu.index')
+                ->with('error', 'Menu tidak ditemukan.');
+        } catch (\Exception $e) {
+            \Log::error('Menu show error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memuat detail menu.');
+        }
+    }
+
+    /**
+     * Search menu items (AJAX endpoint)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function search(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'query' => 'required|string|min:2|max:255',
+                'limit' => 'nullable|integer|min:1|max:50',
+            ]);
+
+            $limit = $validated['limit'] ?? 20;
+            $results = $this->menuService->searchMenuItems($validated['query'], $limit);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $results,
+                'count' => $results->count()
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Menu search error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Terjadi kesalahan saat melakukan pencarian.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get menu recommendations (AJAX endpoint)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getRecommendations(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'category' => 'nullable|string|in:Semua,Sushi Roll,Nigiri & Sashimi,Ramen & Udon,Snack & Dessert,Rice,Party,Beverages',
+            ]);
+
+            $category = $validated['category'] ?? 'Semua';
+            $recommendations = $this->menuService->getRecommendations($category);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $recommendations
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Get recommendations error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Terjadi kesalahan saat memuat rekomendasi.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get menu statistics (AJAX endpoint)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getStatistics(Request $request): JsonResponse
+    {
+        try {
+            if (!Auth::check() || !Auth::user()->is_admin) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $stats = $this->menuService->getMenuStatistics();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $stats
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Get menu statistics error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Unable to get menu statistics'
+            ], 500);
+        }
     }
 }

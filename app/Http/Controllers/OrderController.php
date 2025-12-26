@@ -2,92 +2,178 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\OrderService;
+use App\Services\CartService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Order;
-use App\Models\MenuItem;
-use App\Models\Rating;
+use Illuminate\Validation\ValidationException;
 
+/**
+ * Order Controller
+ * 
+ * Handles order operations including checkout, order creation, and rating
+ */
 class OrderController extends Controller
 {
-    public function checkout(Request $request)
+    private OrderService $orderService;
+    private CartService $cartService;
+
+    /**
+     * Constructor
+     *
+     * @param OrderService $orderService
+     * @param CartService $cartService
+     */
+    public function __construct(OrderService $orderService, CartService $cartService)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk checkout.');
-        }
+        $this->orderService = $orderService;
+        $this->cartService = $cartService;
+    }
 
-        $cart = $request->session()->get('cart', []);
-
-        if (empty($cart)) {
-            return redirect()->route('cart.index')->with('error', 'Keranjang Anda kosong.');
-        }
-
-        $menuItems = MenuItem::whereIn('id', array_keys($cart))->get();
-        
-        foreach ($menuItems as $menuItem) {
-            if (isset($cart[$menuItem->id])) {
-                $quantity = $cart[$menuItem->id]['quantity'];
-                Order::create([
-                    'user_id' => Auth::id(),
-                    'menu_item_id' => $menuItem->id,
-                    'quantity' => $quantity,
-                    'total_price' => $menuItem->price * $quantity,
-                ]);
+    /**
+     * Process checkout from cart
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function checkout(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        try {
+            if (!Auth::check()) {
+                return redirect()->route('login')
+                    ->with('error', 'Silakan login terlebih dahulu untuk checkout.');
             }
+
+            $cart = $request->session()->get('cart', []);
+
+            if (empty($cart)) {
+                return redirect()->route('cart.index')
+                    ->with('error', 'Keranjang Anda kosong.');
+            }
+
+            $this->orderService->processCheckout($cart);
+            $this->cartService->clearCart();
+
+            return redirect()->route('history.index')
+                ->with('success', 'Pesanan berhasil! Jangan lupa kasih rating ya!');
+
+        } catch (\Exception $e) {
+            \Log::error('Checkout error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memproses checkout.');
         }
-
-        $request->session()->forget('cart');
-
-        return redirect()->route('history.index')->with('success', 'Pesanan berhasil! Jangan lupa kasih rating ya!');
     }
 
-    public function store(Request $request)
+    /**
+     * Create a single order
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $request->validate([
-            'menu_item_id' => 'required|exists:menu_items,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
+        try {
+            if (!Auth::check()) {
+                return redirect()->route('login')
+                    ->with('error', 'Silakan login terlebih dahulu untuk membuat pesanan.');
+            }
 
-        $menuItem = MenuItem::findOrFail($request->menu_item_id);
-        
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'menu_item_id' => $request->menu_item_id,
-            'quantity' => $request->quantity,
-            'total_price' => $menuItem->price * $request->quantity,
-        ]);
+            $validated = $request->validate([
+                'menu_item_id' => 'required|integer|exists:menu_items,id',
+                'quantity' => 'required|integer|min:1|max:10',
+            ]);
 
-        return back()->with('success', 'Pesanan berhasil ditambahkan!');
+            $this->orderService->createOrder($validated['menu_item_id'], $validated['quantity']);
+
+            return back()->with('success', 'Pesanan berhasil ditambahkan!');
+
+        } catch (ValidationException $e) {
+            return back()
+                ->withErrors($e->validator())
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Create order error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat membuat pesanan.');
+        }
     }
 
-    public function rate(Request $request, $orderId)
+    /**
+     * Rate a menu item
+     *
+     * @param Request $request
+     * @param int $orderId
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function rate(Request $request, int $orderId): \Illuminate\Http\RedirectResponse
     {
-        $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-        ]);
+        try {
+            if (!Auth::check()) {
+                return redirect()->route('login')
+                    ->with('error', 'Silakan login terlebih dahulu untuk memberikan rating.');
+            }
 
-        $order = Order::where('id', $orderId)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+            $validated = $request->validate([
+                'rating' => 'required|integer|min:1|max:5',
+            ]);
 
-        // Create or update rating
-        Rating::updateOrCreate(
-            [
-                'user_id' => Auth::id(),
-                'menu_item_id' => $order->menu_item_id,
-            ],
-            [
-                'rating' => $request->rating,
-            ]
-        );
+            $this->orderService->rateOrder($orderId, $validated['rating']);
 
-        // Update menu item's average rating
-        $menuItem = MenuItem::find($order->menu_item_id);
-        $ratings = Rating::where('menu_item_id', $order->menu_item_id)->get();
-        $menuItem->average_rating = $ratings->avg('rating');
-        $menuItem->rating_count = $ratings->count();
-        $menuItem->save();
+            return back()->with('success', 'Rating berhasil disimpan!');
 
-        return back()->with('success', 'Rating berhasil disimpan!');
+        } catch (ValidationException $e) {
+            return back()
+                ->withErrors($e->validator())
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Rate order error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan rating.');
+        }
+    }
+
+    /**
+     * Get order history for the authenticated user
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function history(Request $request): \Illuminate\View\View
+    {
+        try {
+            if (!Auth::check()) {
+                return redirect()->route('login')
+                    ->with('error', 'Silakan login terlebih dahulu.');
+            }
+
+            $orders = $this->orderService->getUserOrderHistory(Auth::id());
+            
+            return view('history.index', compact('orders'));
+
+        } catch (\Exception $e) {
+            \Log::error('Order history error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memuat riwayat pesanan.');
+        }
+    }
+
+    /**
+     * Get order statistics (AJAX endpoint)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getStatistics(Request $request): JsonResponse
+    {
+        try {
+            if (!Auth::check() || !Auth::user()->is_admin) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $stats = $this->orderService->getOrderStatistics();
+            
+            return response()->json($stats);
+
+        } catch (\Exception $e) {
+            \Log::error('Get order statistics error: ' . $e->getMessage());
+            return response()->json(['error' => 'Unable to get statistics'], 500);
+        }
     }
 }

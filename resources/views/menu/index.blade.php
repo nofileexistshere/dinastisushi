@@ -36,7 +36,7 @@
                                 <path fill-rule="evenodd" d="M10 2a4 4 0 100 8 4 4 0 000-8zM4 14a6 6 0 1112 0v1a1 1 0 01-1 1H5a1 1 0 01-1-1v-1z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <span class="font-medium truncate max-w-[8rem]">{{ Auth::user()->name }}</span>
+                        <span class="font-medium truncate max-w-32">{{ Auth::user()->name }}</span>
                     </div>
                 </div>
             </div>
@@ -55,11 +55,11 @@
         <div class="bg-white rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 mb-8">
             <form method="GET" action="{{ route('menu.index') }}" class="space-y-4">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:space-x-4">
-                    <div class="flex-grow">
+                    <div class="grow">
                         <input type="text" name="search" value="{{ $search }}" placeholder="Cari menu sushi..."
                             class="w-full px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm sm:text-base">
                     </div>
-                    <button type="submit" class="bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-full hover:from-pink-600 hover:to-orange-600 transition-all text-sm sm:text-base">
+                    <button type="submit" class="bg-linear-to-r from-pink-500 to-orange-500 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-full hover:from-pink-600 hover:to-orange-600 transition-all text-sm sm:text-base">
                         Cari
                     </button>
                 </div>
@@ -102,11 +102,32 @@
                         </div>
                         
                         <div class="p-6">
-                            <div class="flex justify-between items-start mb-3">
-                                <h3 class="text-xl font-bold text-gray-900 line-clamp-1">{{ $item->name }}</h3>
+                            <div class="mb-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h3 class="text-xl font-bold text-gray-900 line-clamp-1">{{ $item->name }}</h3>
+                                    @if($item->tags && count($item->tags) > 0)
+                                        <div class="flex gap-1 flex-wrap">
+                                            @foreach(array_slice($item->tags, 0, 2) as $tag)
+                                                <span class="px-2 py-1 bg-pink-50 text-pink-600 text-xs rounded-full font-medium">
+                                                    {{ $tag }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                                
+                                <p class="text-gray-600 text-sm leading-relaxed mb-3">{{ $item->description }}</p>
+                                
+                                @if($item->tags && count($item->tags) > 2)
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach(array_slice($item->tags, 2) as $tag)
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                                {{ $tag }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </div>
-                            
-                            <p class="text-gray-600 text-sm mb-4 line-clamp-2 h-10">{{ $item->description }}</p>
                             
                             <div class="flex items-center mb-4">
                                 <div class="flex text-yellow-500">
@@ -131,7 +152,7 @@
                                     @csrf
                                     <input type="hidden" name="menu_item_id" value="{{ $item->id }}">
                                     <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" class="bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold px-4 py-2 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all flex items-center text-sm shadow-md hover:shadow-lg transform active:scale-95">
+                                    <button type="submit" class="bg-linear-to-r from-pink-500 to-orange-500 text-white font-semibold px-4 py-2 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all flex items-center text-sm shadow-md hover:shadow-lg transform active:scale-95">
                                         <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
                                         </svg>
@@ -210,7 +231,7 @@
                                         @csrf
                                         <input type="hidden" name="menu_item_id" value="{{ $item->id }}">
                                         <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold px-4 py-2 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all flex items-center text-sm shadow-md hover:shadow-lg transform active:scale-95">
+                                        <button type="submit" class="bg-linear-to-r from-pink-500 to-orange-500 text-white font-semibold px-4 py-2 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all flex items-center text-sm shadow-md hover:shadow-lg transform active:scale-95">
                                             <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
                                             </svg>

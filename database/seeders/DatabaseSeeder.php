@@ -16,35 +16,43 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create admin user
-        $admin = User::create([
-            'name' => 'Admin Dinasti Sushi',
-            'email' => 'admin@dinastisushi.com',
-            'password' => Hash::make('admin123'),
-            'is_admin' => true,
-        ]);
+        // Create admin user (only if not exists)
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@dinastisushi.com'],
+            [
+                'name' => 'Admin Dinasti Sushi',
+                'password' => Hash::make('admin123'),
+                'is_admin' => true,
+            ]
+        );
 
-        // Create demo users
-        $user1 = User::create([
-            'name' => 'Budi Santoso',
-            'email' => 'budi@example.com',
-            'password' => Hash::make('password'),
-            'is_admin' => false,
-        ]);
+        // Create demo users (only if not exists)
+        $user1 = User::firstOrCreate(
+            ['email' => 'budi@example.com'],
+            [
+                'name' => 'Budi Santoso',
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+            ]
+        );
 
-        $user2 = User::create([
-            'name' => 'Siti Nurhaliza',
-            'email' => 'siti@example.com',
-            'password' => Hash::make('password'),
-            'is_admin' => false,
-        ]);
+        $user2 = User::firstOrCreate(
+            ['email' => 'siti@example.com'],
+            [
+                'name' => 'Siti Nurhaliza',
+                'password' => Hash::make('password'),
+                'is_admin' => false,
+            ]
+        );
 
-        $user3 = User::create([
-            'name' => 'Ahmad Rizki',
-            'email' => 'ahmad@example.com',
-            'password' => Hash::make('password'),
-            'is_admin' => false,
-        ]);
+        $user3 = User::firstOrCreate(
+            ['email' => 'ahmad@example.com'],
+            [
+                'name' => 'Ahmad Rizki',
+                'password' => Hash::make('password'),
+                'is_admin' => false,
+            ]
+        );
 
         // Create menu items
         $menuItems = [
