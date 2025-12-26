@@ -109,35 +109,36 @@
     <div class="lg:hidden">
         @forelse($orders as $order)
             <div class="border-b border-gray-200 p-4">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-900">#{{ $order->id }}</p>
-                        <p class="text-xs text-gray-500">{{ $order->created_at->format('d M Y, H:i') }}</p>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center space-x-3 flex-1 min-w-0">
+                        <img src="{{ $order->menuItem->image }}" alt="{{ $order->menuItem->name }}" class="w-16 h-16 rounded-lg object-cover shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-gray-900 truncate">{{ $order->menuItem->name }}</p>
+                            <p class="text-xs text-gray-500">{{ $order->menuItem->category }}</p>
+                            <p class="text-xs text-gray-600 mt-1">{{ $order->user->name }}</p>
+                        </div>
                     </div>
-                    <div class="text-right shrink-0 ml-3">
-                        <p class="text-sm font-bold text-green-600">Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
+                    <div class="text-right shrink-0 ml-4">
+                        <p class="text-lg font-bold text-green-600">Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
                         <p class="text-xs text-gray-500">{{ $order->quantity }}x</p>
                     </div>
                 </div>
                 
-                <div class="flex items-start space-x-3 mb-3">
-                    <img src="{{ $order->menuItem->image }}" alt="{{ $order->menuItem->name }}" class="w-12 h-12 rounded-lg object-cover shrink-0">
+                <div class="flex justify-between items-center">
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ $order->menuItem->name }}</p>
-                        <p class="text-xs text-gray-500">{{ $order->menuItem->category }}</p>
-                        <p class="text-xs text-gray-600 mt-1">{{ $order->user->name }}</p>
-                        <p class="text-xs text-gray-500 truncate">{{ $order->user->email }}</p>
+                        <p class="text-xs text-gray-500">#{{ $order->id }}</p>
+                        <p class="text-xs text-gray-400 truncate">{{ $order->user->email }}</p>
+                        <p class="text-xs text-gray-400">{{ $order->created_at->format('d M Y, H:i') }}</p>
                     </div>
-                </div>
-                
-                <div class="flex justify-end">
-                    <form method="POST" action="{{ route('admin.orders.destroy', $order->id) }}" onsubmit="return confirm('Yakin ingin menghapus pesanan ini?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-600 hover:text-red-900 font-medium text-sm">
-                            Hapus
-                        </button>
-                    </form>
+                    <div class="shrink-0 ml-4">
+                        <form method="POST" action="{{ route('admin.orders.destroy', $order->id) }}" onsubmit="return confirm('Yakin ingin menghapus pesanan ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-600 hover:text-red-900 font-medium text-sm">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         @empty
