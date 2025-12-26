@@ -122,7 +122,7 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Mie udon tebal dengan kuah dashi dan topping tempura udang',
                 'price' => 48000,
                 'category' => 'Ramen & Udon',
-                'image' => 'https://images.unsplash.com/photo-1548865166-52bd6d389596?w=400',
+                'image' => 'https://images.unsplash.com/photo-1734529300659-e7c6cdc34efe?w=400',
                 'tags' => ['Udon', 'Tempura', 'Kuah'],
             ],
             [
@@ -140,7 +140,7 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Kacang kedelai muda rebus dengan garam laut',
                 'price' => 15000,
                 'category' => 'Snack & Dessert',
-                'image' => 'https://images.unsplash.com/photo-1627042633145-b780d842b65e?w=400',
+                'image' => 'https://images.unsplash.com/photo-1564894809611-1742fc40ed80?w=400',
                 'tags' => ['Sehat', 'Cemilan'],
             ],
             [
@@ -148,7 +148,7 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Bola-bola tepung isi gurita (6 pcs)',
                 'price' => 25000,
                 'category' => 'Snack & Dessert',
-                'image' => 'https://images.unsplash.com/photo-1615887023516-9b6e51f4c787?w=400',
+                'image' => 'https://images.unsplash.com/photo-1742633882704-41ec3a57dbb7?w=400',
                 'tags' => ['Gurita', 'Panas', 'Snack'],
             ],
             [
@@ -164,7 +164,7 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Kue mochi kenyal dengan isi es krim (2 pcs)',
                 'price' => 22000,
                 'category' => 'Snack & Dessert',
-                'image' => 'https://images.unsplash.com/photo-1623592945627-2c5e538d3394?w=400',
+                'image' => 'https://images.unsplash.com/photo-1631206753348-db44968fd440?w=400',
                 'tags' => ['Mochi', 'Manis', 'Dessert'],
             ],
 
