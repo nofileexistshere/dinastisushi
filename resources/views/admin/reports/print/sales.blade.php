@@ -29,7 +29,8 @@
 <body onload="window.print()">
     <div class="container">
         <div class="header">
-            <h1>🍣 Dinasti Sushi</h1>
+            <img src="{{ asset('images/logo.png') }}" alt="Dinasti Sushi" style="height: 80px; margin-bottom: 10px;">
+            <h1>Dinasti Sushi</h1>
             <p>Laporan Penjualan</p>
         </div>
 

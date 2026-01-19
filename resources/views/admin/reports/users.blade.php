@@ -19,7 +19,10 @@
             <button type="submit" class="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium">
                 Filter
             </button>
-            <a href="{{ route('admin.reports.print', ['type' => 'users', 'start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-medium">
+            <a href="{{ route('admin.reports.print', ['type' => 'users', 'start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd"/>
+                </svg>
                 Cetak
             </a>
         </form>
