@@ -60,6 +60,13 @@
                         <span x-show="sidebarOpen" x-transition class="text-sm font-medium whitespace-nowrap">Kelola Menu</span>
                     </a>
                     
+                    <a href="{{ route('admin.reports.index') }}" class="flex items-center px-3 py-3 rounded-lg transition {{ request()->routeIs('admin.reports.*') ? 'bg-orange-500 text-white hover:bg-orange-600' : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600' }}" :class="!sidebarOpen ? 'justify-center' : ''" :title="!sidebarOpen ? 'Laporan' : ''">
+                        <svg class="w-5 h-5 flex-shrink-0" :class="sidebarOpen ? 'mr-3' : ''" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4-1a1 1 0 10-2 0v7a1 1 0 102 0V8z" clip-rule="evenodd"/>
+                        </svg>
+                        <span x-show="sidebarOpen" x-transition class="text-sm font-medium whitespace-nowrap">Laporan</span>
+                    </a>
+                    
                     <div class="border-t border-gray-200 my-3"></div>
                     
                     <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-3 rounded-lg transition text-gray-700 hover:bg-orange-50 hover:text-orange-600" :class="!sidebarOpen ? 'justify-center' : ''" :title="!sidebarOpen ? 'Lihat Website' : ''">
