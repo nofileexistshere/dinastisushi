@@ -26,7 +26,7 @@ class ReportController extends Controller
      */
     public function sales(Request $request)
     {
-        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $startDate = $request->get('start_date', Carbon::now()->subYear()->format('Y-m-d'));
         $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
 
         $orders = Order::with(['user', 'menuItem'])
@@ -67,7 +67,7 @@ class ReportController extends Controller
      */
     public function topMenu(Request $request)
     {
-        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $startDate = $request->get('start_date', Carbon::now()->subYear()->format('Y-m-d'));
         $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
 
         $topMenuItems = MenuItem::select('menu_items.*')
@@ -108,7 +108,7 @@ class ReportController extends Controller
      */
     public function users(Request $request)
     {
-        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $startDate = $request->get('start_date', Carbon::now()->subYear()->format('Y-m-d'));
         $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
 
         $users = User::where('is_admin', false)
@@ -149,7 +149,7 @@ class ReportController extends Controller
      */
     public function ratings(Request $request)
     {
-        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $startDate = $request->get('start_date', Carbon::now()->subYear()->format('Y-m-d'));
         $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
 
         $ratings = Rating::with(['user', 'menuItem'])
