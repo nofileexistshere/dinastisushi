@@ -31,7 +31,8 @@
         <div class="header">
             <img src="{{ asset('images/logo.png') }}" alt="Dinasti Sushi" style="height: 80px; margin-bottom: 10px;">
             <h1>Dinasti Sushi</h1>
-            <p>Laporan Penjualan</p>
+            <p style="font-size: 11px; color: #666; margin-bottom: 5px;">Jl. Raya Cipanas No.58, Gadog, Kec. Pacet, Kabupaten Cianjur, Jawa Barat 43253</p>
+            <p style="font-size: 14px; font-weight: bold; margin-top: 10px;">Laporan Penjualan</p>
         </div>
 
         <div class="period">
@@ -82,6 +83,13 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="signature" style="text-align: right; margin-top: 50px; margin-bottom: 30px;">
+            <p style="font-weight: bold;">MENGETAHUI</p>
+            <p>Cipanas, {{ now()->translatedFormat('l, d F Y') }}</p>
+            <br><br><br>
+            <p style="font-weight: bold; text-decoration: underline;">Moh Ardi Kurniawan</p>
+        </div>
 
         <div class="footer">
             <p>Dicetak pada: {{ now()->format('d M Y H:i:s') }}</p>
