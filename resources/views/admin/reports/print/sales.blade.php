@@ -86,7 +86,7 @@
 
         <div class="signature" style="text-align: right; margin-top: 50px; margin-bottom: 30px;">
             <p style="font-weight: bold;">MENGETAHUI</p>
-            <p>Cipanas, {{ now()->translatedFormat('l, d F Y') }}</p>
+            <p>Cipanas, {{ now()->locale('id')->translatedFormat('l, d F Y') }}</p>
             <br><br><br>
             <p style="font-weight: bold; text-decoration: underline;">Moh Ardi Kurniawan</p>
         </div>
