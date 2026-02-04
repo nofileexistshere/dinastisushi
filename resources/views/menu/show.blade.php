@@ -125,7 +125,7 @@
                         
                         <div class="bg-orange-50 rounded-xl p-4 text-center">
                             <div class="text-2xl font-bold text-orange-600">{{ number_format($menuItem->average_rating, 1) }}</div>
-                            <div class="text-sm text-gray-600">Rating</div>
+                            <div class="text-sm text-gray-600">Ulasan</div>
                         </div>
                         
                         <div class="bg-green-50 rounded-xl p-4 text-center">
