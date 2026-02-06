@@ -11,6 +11,9 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
+            if (Auth::user()->is_admin) {
+                return redirect()->route('admin.dashboard');
+            }
             return redirect()->route('dashboard');
         }
         
@@ -29,7 +32,13 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('dashboard');
+            
+            // Redirect admin to admin dashboard, regular users to user dashboard
+            if (Auth::user()->is_admin) {
+                return redirect()->intended(route('admin.dashboard'));
+            }
+            
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
@@ -41,6 +50,12 @@ class AuthController extends Controller
     {
         $user = User::findOrFail($userId);
         Auth::login($user);
+        
+        // Redirect admin to admin dashboard, regular users to user dashboard
+        if ($user->is_admin) {
+            return redirect()->route('admin.dashboard');
+        }
+        
         return redirect()->route('dashboard');
     }
 

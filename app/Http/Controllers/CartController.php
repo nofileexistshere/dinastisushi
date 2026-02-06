@@ -2,93 +2,164 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CartService;
 use Illuminate\Http\Request;
-use App\Models\MenuItem;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
+/**
+ * Cart Controller
+ * 
+ * Handles all cart-related operations including adding, removing, and updating items
+ */
 class CartController extends Controller
 {
-    public function index(Request $request)
-    {
-        $cart = $request->session()->get('cart', []);
-        $items = [];
-        $total = 0;
+    private CartService $cartService;
 
-        if (!empty($cart)) {
-            $menuItems = MenuItem::whereIn('id', array_keys($cart))->get();
-            foreach ($menuItems as $menuItem) {
-                $qty = $cart[$menuItem->id]['quantity'] ?? 0;
-                $lineTotal = $menuItem->price * $qty;
-                $total += $lineTotal;
-                $items[] = [
-                    'model' => $menuItem,
-                    'quantity' => $qty,
-                    'total_price' => $lineTotal,
-                ];
-            }
+    /**
+     * Constructor
+     *
+     * @param CartService $cartService
+     */
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
+
+    /**
+     * Display the shopping cart
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function index(Request $request): \Illuminate\View\View
+    {
+        try {
+            $cart = $request->session()->get('cart', []);
+            $items = $this->cartService->getCartItems($cart);
+            $total = $this->cartService->calculateTotal($items);
+            $cartCount = $this->cartService->getCartCount($cart);
+
+            return view('cart.index', compact('items', 'total', 'cartCount'));
+        } catch (\Exception $e) {
+            \Log::error('Cart index error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memuat keranjang.');
         }
-
-        $cartCount = array_sum(array_column($cart, 'quantity'));
-
-        return view('cart.index', compact('items', 'total', 'cartCount'));
     }
 
-    public function add(Request $request)
+    /**
+     * Add item to cart
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function add(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $request->validate([
-            'menu_item_id' => 'required|exists:menu_items,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
+        try {
+            $validated = $request->validate([
+                'menu_item_id' => 'required|integer|exists:menu_items,id',
+                'quantity' => 'required|integer|min:1|max:10',
+            ]);
 
-        $menuItem = MenuItem::findOrFail($request->menu_item_id);
+            $this->cartService->addItem($validated['menu_item_id'], $validated['quantity']);
 
-        $cart = $request->session()->get('cart', []);
-        if (isset($cart[$menuItem->id])) {
-            $cart[$menuItem->id]['quantity'] += $request->quantity;
-        } else {
-            $cart[$menuItem->id] = [
-                'quantity' => $request->quantity,
-            ];
+            return back()->with('success', 'Menu berhasil dimasukkan ke keranjang!');
+        } catch (ValidationException $e) {
+            return back()
+                ->withErrors($e->validator())
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Add to cart error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menambahkan menu ke keranjang.');
         }
-
-        $request->session()->put('cart', $cart);
-
-        return back()->with('success', 'Menu berhasil dimasukkan ke keranjang!');
     }
 
-    public function remove(Request $request)
+    /**
+     * Remove item from cart
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function remove(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $request->validate([
-            'menu_item_id' => 'required|integer',
-        ]);
+        try {
+            $validated = $request->validate([
+                'menu_item_id' => 'required|integer',
+            ]);
 
-        $cart = $request->session()->get('cart', []);
-        unset($cart[$request->menu_item_id]);
-        $request->session()->put('cart', $cart);
+            $this->cartService->removeItem($validated['menu_item_id']);
 
-        return back()->with('success', 'Menu dihapus dari keranjang.');
-    }
-
-    public function update(Request $request)
-    {
-        $request->validate([
-            'menu_item_id' => 'required|integer',
-            'quantity' => 'required|integer|min:1',
-        ]);
-
-        $cart = $request->session()->get('cart', []);
-
-        if (isset($cart[$request->menu_item_id])) {
-            $cart[$request->menu_item_id]['quantity'] = $request->quantity;
-            $request->session()->put('cart', $cart);
+            return back()->with('success', 'Menu dihapus dari keranjang.');
+        } catch (ValidationException $e) {
+            return back()
+                ->withErrors($e->validator())
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Remove from cart error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menghapus menu dari keranjang.');
         }
-
-        return back()->with('success', 'Jumlah pesanan diperbarui.');
     }
 
-    public function clear(Request $request)
+    /**
+     * Update item quantity in cart
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $request->session()->forget('cart');
+        try {
+            $validated = $request->validate([
+                'menu_item_id' => 'required|integer',
+                'quantity' => 'required|integer|min:1|max:10',
+            ]);
 
-        return back()->with('success', 'Semua item di keranjang telah dihapus.');
+            $this->cartService->updateItem($validated['menu_item_id'], $validated['quantity']);
+
+            return back()->with('success', 'Jumlah pesanan diperbarui.');
+        } catch (ValidationException $e) {
+            return back()
+                ->withErrors($e->validator())
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Update cart error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memperbarui jumlah pesanan.');
+        }
+    }
+
+    /**
+     * Clear all items from cart
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function clear(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        try {
+            $this->cartService->clearCart();
+            return back()->with('success', 'Semua item di keranjang telah dihapus.');
+        } catch (\Exception $e) {
+            \Log::error('Clear cart error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat mengosongkan keranjang.');
+        }
+    }
+
+    /**
+     * Get cart count (AJAX endpoint)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getCartCount(Request $request): JsonResponse
+    {
+        try {
+            $cart = $request->session()->get('cart', []);
+            $count = $this->cartService->getCartCount($cart);
+            
+            return response()->json(['count' => $count]);
+        } catch (\Exception $e) {
+            \Log::error('Get cart count error: ' . $e->getMessage());
+            return response()->json(['error' => 'Unable to get cart count'], 500);
+        }
     }
 }

@@ -24,15 +24,17 @@ class HistoryController extends Controller
         $ordersQuery = Order::with(['menuItem', 'menuItem.ratings' => function($query) use ($user) {
             $query->where('user_id', $user->id);
         }])
-        ->where('user_id', $user->id);
+        ->where('orders.user_id', $user->id);
         
         if ($sortBy === 'rating') {
-            $ordersQuery->join('ratings', function($join) use ($user) {
-                $join->on('orders.menu_item_id', '=', 'ratings.menu_item_id')
-                     ->where('ratings.user_id', '=', $user->id);
-            })->orderBy('ratings.rating', 'desc');
+            $ordersQuery->select('orders.*')
+                ->join('ratings', function($join) use ($user) {
+                    $join->on('orders.menu_item_id', '=', 'ratings.menu_item_id')
+                         ->where('ratings.user_id', '=', $user->id);
+                })
+                ->orderBy('ratings.rating', 'desc');
         } else {
-            $ordersQuery->orderBy('created_at', 'desc');
+            $ordersQuery->orderBy('orders.created_at', 'desc');
         }
         
         $orders = $ordersQuery->get();

@@ -8,8 +8,13 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
 
+// Landing page
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
+
 // Authentication routes
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::get('/login/demo/{userId}', [AuthController::class, 'loginAsDemo'])->name('login.demo');
@@ -33,5 +38,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
     
     Route::post('/order', [OrderController::class, 'store'])->name('order.store');
+    Route::post('/order/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
     Route::post('/order/{orderId}/rate', [OrderController::class, 'rate'])->name('order.rate');
+});
+
+// Admin routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    
+    Route::get('/orders', [\App\Http\Controllers\Admin\OrderManagementController::class, 'index'])->name('orders.index');
+    Route::delete('/orders/{id}', [\App\Http\Controllers\Admin\OrderManagementController::class, 'destroy'])->name('orders.destroy');
+    
+    Route::resource('menu', \App\Http\Controllers\Admin\MenuManagementController::class);
+    
+    // Reports routes
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('reports.sales');
+    Route::get('/reports/top-menu', [\App\Http\Controllers\Admin\ReportController::class, 'topMenu'])->name('reports.top-menu');
+    Route::get('/reports/users', [\App\Http\Controllers\Admin\ReportController::class, 'users'])->name('reports.users');
+    Route::get('/reports/ratings', [\App\Http\Controllers\Admin\ReportController::class, 'ratings'])->name('reports.ratings');
+    Route::get('/reports/print/{type}', [\App\Http\Controllers\Admin\ReportController::class, 'print'])->name('reports.print');
 });

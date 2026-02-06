@@ -61,7 +61,9 @@
                     
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">{{ $menuItem->name }}</h2>
                     
-                    <p class="text-gray-600 text-lg mb-6">{{ $menuItem->description }}</p>
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <p class="text-gray-700 text-lg leading-relaxed">{{ $menuItem->description }}</p>
+                    </div>
                     
                     <div class="flex items-center mb-6">
                         <div class="flex text-yellow-500">
@@ -111,7 +113,7 @@
                         </div>
                         <button 
                             type="submit" 
-                            class="w-full bg-gradient-to-r from-pink-500 to-orange-500 text-white font-bold py-4 px-8 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all text-lg"
+                            class="w-full bg-linear-to-r from-pink-500 to-orange-500 text-white font-bold py-4 px-8 rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all text-lg"
                         >
                             Tambah ke Pesanan
                         </button>
