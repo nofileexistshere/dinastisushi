@@ -108,9 +108,9 @@
             <div x-show="open" x-transition class="bg-[#ffedd5] rounded-2xl p-6">
                 <h4 class="font-semibold text-[#E65100] mb-4">Cara Kerja Sistem:</h4>
                 <ol class="space-y-3 text-gray-700">
-                    <li>1. Sistem menganalisis histori pembelian & rating Anda</li>
+                    <li>1. Sistem menganalisis histori pembelian & ulasan Anda</li>
                     <li>2. Mencari pengguna serupa dengan Pearson Correlation</li>
-                    <li>3. Memprediksi rating menu yang belum dicoba</li>
+                    <li>3. Memprediksi ulasan menu yang belum dicoba</li>
                     <li>4. Menggabungkan analisis konten</li>
                     <li>5. Menghasilkan rekomendasi personal</li>
                 </ol>
@@ -186,7 +186,7 @@
                                     <div class="text-lg sm:text-2xl font-bold text-[#F57C00]">
                                         {{ number_format($rec['menu_item']->average_rating, 1) }}
                                     </div>
-                                    <div class="text-xs sm:text-sm text-gray-600">Rating</div>
+                                    <div class="text-xs sm:text-sm text-gray-600">Ulasan</div>
                                 </div>
 
                                 <div class="bg-green-50 rounded-xl p-2 sm:p-4 text-center">
@@ -205,7 +205,7 @@
             @else
                 <div class="bg-[#fff7ed] rounded-3xl shadow-lg p-8 text-center">
                     <p class="text-gray-700 mb-4">
-                        Belum ada rekomendasi. Mulai pesan dan beri rating untuk mendapatkan rekomendasi personal!
+                        Belum ada rekomendasi. Mulai pesan dan beri ulasan untuk mendapatkan rekomendasi personal!
                     </p>
                     <a href="{{ route('menu.index') }}" 
                        class="inline-block bg-linear-to-r from-[#F57C00] to-[#E65100] 
